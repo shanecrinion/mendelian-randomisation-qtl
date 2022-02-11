@@ -20,9 +20,11 @@
 # -BRAIN
 # - PSYCHencode ✓
 # ├── Prefrontal cortex ✓
-# - GTEx 
+# - GTEx Release 7
+# ├── Cerebellum
 # ├── Cortex ✓
 # ├── Hypothalamus
+# ├── Whole Blood
 # ├── Full Brain 
 
 
@@ -48,36 +50,36 @@ region <- "prefrontal cortex"
 individuals <- 1387
 individuals_descr <- "Filtered adult samples with matching gene expression and genotypes (679 healthy controls + 497 schizophrenia + 172 bipolar disorder + 31 autism spectrum disorder and 8 affective disorder patients)" 
 data_descr <-  "Full set of cis-eQTLs with no p-value or FDR filtering"
-source <- "http://resource.psychencode.org/Datasets/Derived/QTLs/Full_hg19_cis-eQTL.txt.gz"
+source <- "http://resource.psychencode.org/Datasets/Derived/QTLs/Full_hg19_cis-QTL.txt.gz"
 
 
 # import data
-eQTL <- fread('psychencode/psychencode_Full_hg19_cis-eQTL.txt.gz',sep = ' ')
-colnames(eQTL) <- names(fread("psychencode/DER-08b_hg19_eQTL.bonferroni.txt", sep="\t"))[1:14]
-eQTL.lookup <- fread('~/Desktop/files/data/eqtl/psychencode/SNP_Information_Table_with_Alleles.txt', sep="\t")
-eQTL.sig <- subset(eQTL, nominal_pval < 5e-8)
+QTL <- fread('psychencode/psychencode_Full_hg19_cis-QTL.txt.gz',sep = ' ')
+colnames(QTL) <- names(fread("psychencode/DER-08b_hg19_QTL.bonferroni.txt", sep="\t"))[1:14]
+QTL.lookup <- fread('~/Desktop/files/data/eqtl/psychencode/SNP_Information_Table_with_Alleles.txt', sep="\t")
+QTL.sig <- subset(QTL, nominal_pval < 5e-8)
 
 # get RSID and alleles for remaining SNPs
-eQTL.sig$rsid <- eQTL.lookup$Rsid[match(eQTL.sig$SNP_id, eQTL.lookup$PEC_id)] 
-eQTL.sig$ref <- eQTL.lookup$REF[match(eQTL.sig$SNP_id, eQTL.lookup$PEC_id)]
-eQTL.sig$alt <- eQTL.lookup$ALT[match(eQTL.sig$SNP_id, eQTL.lookup$PEC_id)]
+QTL.sig$rsid <- QTL.lookup$Rsid[match(QTL.sig$SNP_id, QTL.lookup$PEC_id)] 
+QTL.sig$ref <- QTL.lookup$REF[match(QTL.sig$SNP_id, QTL.lookup$PEC_id)]
+QTL.sig$alt <- QTL.lookup$ALT[match(QTL.sig$SNP_id, QTL.lookup$PEC_id)]
 
 # calculate SE
 tail <- 2
-se <- abs(eQTL.sig$regression_slope/ qnorm(eQTL.sig$nominal_pval/tail))
-eQTL.sig$se <- se
+se <- abs(QTL.sig$regression_slope/ qnorm(QTL.sig$nominal_pval/tail))
+QTL.sig$se <- se
 
 # save counts for metadata file
-count.variants <- dim(eQTL)[1] 
-count.sig <- dim(eQTL.sig)[1]
-count.duplicated <- sum(duplicated(eQTL.sig$rsid))
+count.variants <- dim(QTL)[1] 
+count.sig <- dim(QTL.sig)[1]
+count.duplicated <- sum(duplicated(QTL.sig$rsid))
 
 # create a unique locator for each gene-SNP pair (many SNPs associated with > 1 gene)
-eQTL.sig$locator <- paste(eQTL.sig$gene_id, eQTL.sig$rsid, eQTL.sig$SNP_id, sep="-")
+QTL.sig$locator <- paste(QTL.sig$gene_id, QTL.sig$rsid, QTL.sig$SNP_id, sep="-")
 
 
 # format for TwoSampleMR (locator col used for SNPs to preserve all unique gene-SNP pairs)
-exposure_data <- format_data(dat = eQTL.sig, type = "exposure",snp_col ="locator",
+exposure_data <- format_data(dat = QTL.sig, type = "exposure",snp_col ="locator",
                              beta_col = "regression_slope",se_col =  "se",
                              effect_allele_col = "alt",other_allele_col = "ref",pval_col = "nominal_pval")
 
@@ -86,12 +88,12 @@ exposure_data$pos <- exposure_data$SNP
 exposure_data$SNP <- unlist(lapply(strsplit(exposure_data$pos, "-"), '[[' ,2))
 
 # save processed data
-write.csv(exposure_data, file = 'processed_PSYCHencode_eQTL.csv')
-rm(eQTL, eQTL.lookup, eQTL.sig, se)
+write.csv(exposure_data, file = 'processed_PSYCHencode_QTL.csv')
+rm(QTL, QTL.lookup, QTL.sig, se)
 
 # clump data 
 exposure_data <- clump_data(dat = exposure_data, clump_kb = 10000, clump_r2 = 0.001)
-write.csv(exposure_data, file = 'processed_PSYCHencode_eQTL.clumped.csv')
+write.csv(exposure_data, file = 'processed_PSYCHencode_QTL.clumped.csv')
 
 # get gene info
 exposure_data$entrez <- toupper(unlist(lapply(strsplit(exposure_data$pos, "-"), '[[' ,1))) 
@@ -104,4 +106,61 @@ count.genes.unique <- length(unique(exposure_data$entrez))
 
 # write metadata to file
 write_metadata()
+
+#2. GTEx 
+# info for metadata file
+name <- "GTEx Analysis V7"
+region <- "Frontal cortex"
+individuals <- 0
+individuals_descr <- "TBC" 
+data_descr <-  "TBC"
+source <- "https://gtexportal.org/home/datasets"
+
+# import data
+QTL <- fread('gtex-brain/Brain_Cortex.allpairs.txt.gz',sep = '\t')
+QTL.lookup <- fread('gtex-brain/GTEx_Analysis_2016-01-15_v7_WholeGenomeSeq_635Ind_PASS_AB02_GQ20_HETX_MISS15_PLINKQC.lookup_table.txt.gz', sep="\t")
+QTL.sig <- subset(QTL, pval_nominal < 5e-8)
+
+# get RSID and alleles for remaining SNPs
+QTL.sig$rsid <- QTL.lookup$rs_id_dbSNP147_GRCh37p13[match(QTL.sig$variant_id, QTL.lookup$variant_id)] 
+QTL.sig$ref <- QTL.lookup$ref[match(QTL.sig$variant_id, QTL.lookup$variant_id)]
+QTL.sig$alt <- QTL.lookup$alt[match(QTL.sig$variant_id, QTL.lookup$variant_id)]
+QTL.sig$locator <- paste(QTL.sig$gene_id, QTL.sig$rsid, QTL.sig$variant_id, sep="-")
+
+# save counts for metadata file
+count.variants <- dim(QTL)[1] 
+count.sig <- dim(QTL.sig)[1]
+count.duplicated <- sum(duplicated(QTL.sig$rsid))
+
+exposure_data <- format_data(dat = QTL.sig, type = "exposure",
+                             snp_col = "locator",beta_col = "slope", 
+                             se_col = "slope_se",eaf_col = "maf", 
+                             effect_allele_col = "alt",other_allele_col = "ref",
+                             pos_col = "locator",pval_col = "pval_nominal")
+
+# for clumping, set "pos" as locator and SNP as "rsid" (hacky but package doesn't preserve custom columns)
+exposure_data$pos <- exposure_data$SNP
+exposure_data$SNP <- unlist(lapply(strsplit(exposure_data$pos, "-"), '[[' ,2))
+
+# save processed data
+write.csv(exposure_data, file = 'processed_GTExCortex_eQTL.csv')
+rm(QTL, QTL.lookup, QTL.sig, se)
+
+# clump data 
+exposure_data <- clump_data(dat = exposure_data, clump_kb = 10000, clump_r2 = 0.001)
+write.csv(exposure_data, file = 'processed_GTExCortex_eQTL.clumped.csv')
+
+# get gene info
+exposure_data$entrez <- toupper(unlist(lapply(strsplit(exposure_data$pos, "-"), '[[' ,1))) 
+exposure_data$entrez <- unlist(lapply(strsplit(exposure_data$entrez, "[.]"), '[[', 1))
+
+# snp and gene counts
+count.snps <- length(exposure_data$SNP) 
+count.snps.unique <- length(unique(exposure_data$SNP))
+count.genes.unique <- length(unique(exposure_data$entrez))
+
+rm(QTL, QTL.lookup, QTL.sig)
+
+write_metadata()
+
 
