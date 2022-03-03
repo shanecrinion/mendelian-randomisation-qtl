@@ -50,7 +50,8 @@ exposure_data <- read_exposure_data("PGC3-supp/EU/daner_PGC_SCZ_w3_90_0518d_eur.
                      eaf_col = "FRQ_A_53386",   pval_col = "P")
 exposure_data$beta.exposure <- log(exposure_data$beta.exposure) # use log(OR)for binary traits
 
-mr_wald_ratio
+
+## test comment
 
 
 
