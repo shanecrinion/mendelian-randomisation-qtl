@@ -13,7 +13,7 @@ do
     if [[ ! " ${snp_list[*]} " =~ " ${rsid} " ]] 
     then
         echo $rsid
-        zcat '/home/shane/Desktop/files/data/eqtl/psychencode/psychencode_Full_hg19_cis-eQTL.txt.header.gz' | awk -v var_chr=$chr -v var_pos=$pos '{if($2==var_chr && $10 < var_pos+500000 && $10 > var_pos-500000){print}}' >> region_$rsid.txt
+        zcat '/home/shane/Desktop/files/data/eqtl/psychencode/psychencode_Full_hg19_cis-eQTL.txt.header.gz' | awk -v var_chr=$chr -v var_pos=$pos '{if($2==var_chr && $10 <= var_pos+500000 && $10 >= var_pos-500000){print}}' >> region_$rsid.txt
 #       zcat '/home/shane/Desktop/files/data/eqtl/psychencode/psychencode_Full_hg19_cis-eQTL.txt.header.gz' | awk -v var_chr=$2 -v var_pos=${10} "{if( var_chr==$chr && var_pos < $pos+500000 && var_pos > $pos-500000){print}}" >> region_$rsid.txt
 #       zcat /home/shane/Desktop/files/data/eqtl/psychencode/psychencode_Full_hg19_cis-eQTL.txt.header.gz | awk '{if($2==$chr && $10>$pos+500000 && $10<$pos-500000){print}}' >> region_$rsid.txt
         snp_list[${#snp_list[@]}]=$rsid
