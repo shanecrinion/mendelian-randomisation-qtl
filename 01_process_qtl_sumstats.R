@@ -29,8 +29,8 @@
 
 # import libraries
 suppressPackageStartupMessages({
-  library(data.table) # import data
-  library(TwoSampleMR)})
+   library(data.table) # import data
+   library(TwoSampleMR)})
 
 setwd('~/Desktop/files/data/eqtl/')
 
@@ -39,8 +39,8 @@ header <- paste("data", "region", "individuals","individuals.descr","count.varia
 write(header,file="metadata.csv", append=TRUE)
 
 write_metadata <- function(){
-  line <- paste(name, region, individuals,  individuals_descr, count.variants, count.sig, count.duplicated, count.snps, count.snps.unique, count.genes.unique, source, data_descr, sep=",")
-  write(line,file="metadata.csv", append=TRUE)}
+   line <- paste(name, region, individuals,  individuals_descr, count.variants, count.sig, count.duplicated, count.snps, count.snps.unique, count.genes.unique, source, data_descr, sep=",")
+   write(line,file="metadata.csv", append=TRUE)}
 
 ## 1. PSYCHencode 
 # info for metadata file
