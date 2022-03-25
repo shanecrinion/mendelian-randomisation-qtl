@@ -1,6 +1,8 @@
 #cortex
 library(TwoSampleMR)
 setwd('~/Desktop/files/data/eqtl/')
+
+View(available_outcomes())
 exposure_data <- read.csv('processed_GTExCortex_eQTL.clumped.csv')
 exposure_data$SNP <- unlist(lapply(strsplit(exposure_data$pos, "-"), '[[' ,2))
 outcome_data <- extract_outcome_data(snps = exposure_data$SNP, outcomes = c('ieu-a-1183', 'ieu-a-1185', "ieu-b-41", "finn-b-F5_INSOMNIA", "ieu-b-102", "ukb-b-4956", "finn-b-F5_SCHZPHR"))
@@ -65,7 +67,7 @@ write.csv(mr_wr.sig %>% arrange(p),file = '~/Desktop/files/current-projects/eQTL
 write.csv(mr_wr.sig %>% arrange(outcome,p),file = '~/Desktop/files/current-projects/eQTL-MR/results/mr_wr_GTExWholeBlood.byoutcome.alloutcomes.csv')
 dim(mr_wr)
 
- hypothalamus 
+hypothalamus 
 exposure_data <- read.csv('processed_GTExHypothalamus_eQTL.clumped.csv')
 exposure_data$SNP <- unlist(lapply(strsplit(exposure_data$pos, "-"), '[[' ,2))
 outcome_data <- extract_outcome_data(snps = exposure_data$SNP, outcomes = c('ieu-a-1183', 'ieu-a-1185', "ieu-b-41", "finn-b-F5_INSOMNIA", "ieu-b-102", "ukb-b-4956", "finn-b-F5_SCHZPHR"))
