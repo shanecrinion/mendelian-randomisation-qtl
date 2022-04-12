@@ -8,18 +8,26 @@ library(coloc)
 # This script processes ugly non-standard GWAS summary stats and formats for TwoSampleMR
 
 # PROCESSES & OUTPUTS
-# - 1. Import results from MR analysis
-# ├── Import sig MR associations from google sheets
-# ├── Import lookup file for ref and alt alleles for eQTL data
-# ├── Import gtf file for gene names for eQTL data
-# ├── Import +/- 500kb regions for the SNP, extracted using script regions.sh
-# output:   
-# - 2. Import sumstats for SNPs within +/-500 of instrument from eQTL dataset
-# ├── 
-# ├── 
-# output: 
-# - 3. create metadata file
-# ├── 
+# - 1. Process outcomes
+# ├── Import and format GWAS data
+# ├── Convert OR to logOR where necessary
+# ├── Create var variable
+# output: processed GWAS data   
+# - 2. Process exposures
+# ├── Import and format eQTL data
+# ├── Get RSID, ref and alt allele and gene names
+# ├── Filter to one SNP per gene
+# output: processed eQTL data
+# - 3. format datasets
+# ├── Format for coloc analysis
+# ├── Create list of all required data
+# output: data formatted for coloc.abf 
+# - 4. Run coloc
+# ├── Import required files for formatting
+# ├── Perform coloc SNP by SNP
+# output: Results files 
+
+
 # output: metadata file for datasets used
 
 
@@ -159,24 +167,8 @@ run_coloc <- function(sig_data, tissue, eqtl_source, filtering){
       write.csv(x=results$priors, file=paste0('coloc/', phenotype, '/',prefix, '_coloc.beta_change.priors.csv'))}}}
 
 
-# run commands
-
-# run_coloc(subset(data, outcome=="Bipolar Disorder"), 
-#           tissue='cortex', eqtl_source="gtex", filtering=2)
-# run_coloc(subset(data, outcome=="Bipolar Disorder"), 
-#           tissue='hippocampus', eqtl_source="gtex", filtering=2)
-# run_coloc(subset(data, outcome=="Morning/evening person chronotype"),
-#           tissue="hippocampus", eqtl_source = 'gtex', filtering=2)
-# run_coloc(subset(data, outcome=="ASD"),
-#           tissue="hippocampus", eqtl_source = 'gtex', filtering=2)
-# 
-
 # hypothalamus
-
 googlesheets4::gs4_auth(email = "shanecrinion@gmail.com")
-
-
-## let's start with hypothalamus
 data <-read_sheet(
   "https://docs.google.com/spreadsheets/d/1FygOe-3mZynCf1TvKIu_8F8EIfbxgndMpKW_EqbBN7Y/edit?usp=sharing",sheet = "GTEx v8 (hypothalamus)")
 unique(data$outcome)
